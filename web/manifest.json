@@ -1,11 +1,11 @@
 {
-    "name": "venicare_app",
-    "short_name": "venicare_app",
+    "name": "安心守护",
+    "short_name": "安心守护",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F3F1EA",
+    "theme_color": "#0F6E56",
+    "description": "居家照护家属端演示",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

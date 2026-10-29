@@ -3,15 +3,106 @@ import 'package:venicare_app/src/domain/models.dart';
 class DemoRepository {
   AppState loadInitialState() {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
     return AppState(
+      familyName: '妈妈的家',
+      themePreference: AppThemePreference.system,
+      lastSyncedAt: now.subtract(const Duration(seconds: 20)),
+      privacy: const PrivacySettings(
+        shareRoom: true,
+        shareMedication: true,
+        shareDeviceHealth: true,
+      ),
+      protectionNote: null,
       recipient: CareRecipient(
         id: 'recipient-mother',
         name: '妈妈',
         relationship: '我的母亲',
         protectionLevel: ProtectionLevel.urgent,
         statusText: '存在 1 个待处理紧急事件',
+        presenceText: '语音询问后暂无回应',
+        phoneMasked: '138****6210',
         lastUpdatedAt: now.subtract(const Duration(minutes: 1)),
+      ),
+      members: const [
+        FamilyMember(
+          id: 'member-self',
+          name: '李俊',
+          role: FamilyRole.owner,
+          phoneMasked: '137****2208',
+          relation: '儿子',
+          isSelf: true,
+        ),
+        FamilyMember(
+          id: 'member-wang',
+          name: '王敏',
+          role: FamilyRole.admin,
+          phoneMasked: '138****1024',
+          relation: '女儿',
+        ),
+        FamilyMember(
+          id: 'member-chen',
+          name: '陈浩',
+          role: FamilyRole.contact,
+          phoneMasked: '139****8831',
+          relation: '邻居',
+        ),
+      ],
+      escalation: const [
+        EscalationStep(
+          id: 'app',
+          channel: 'App',
+          description: '事件发生后立即通知可接收的成员',
+          delayMinutes: 0,
+          enabled: true,
+          locked: true,
+        ),
+        EscalationStep(
+          id: 'sms',
+          channel: '短信',
+          description: '2 分钟仍无人认领时发送',
+          delayMinutes: 2,
+          enabled: true,
+        ),
+        EscalationStep(
+          id: 'call',
+          channel: '电话',
+          description: '5 分钟仍无人认领时拨打',
+          delayMinutes: 5,
+          enabled: true,
+        ),
+      ],
+      accessLogs: [
+        AccessRecord(
+          id: 'log-1',
+          actor: '李俊',
+          action: '查看了「疑似跌倒」',
+          occurredAt: now.subtract(const Duration(minutes: 3)),
+        ),
+        AccessRecord(
+          id: 'log-2',
+          actor: '王敏',
+          action: '打开了家庭中枢状态',
+          occurredAt: now.subtract(const Duration(hours: 2)),
+        ),
+        AccessRecord(
+          id: 'log-3',
+          actor: '李俊',
+          action: '确认了早间用药',
+          occurredAt: now.subtract(const Duration(hours: 3, minutes: 20)),
+        ),
+      ],
+      selfCheck: SelfCheckReport(
+        checkedAt: now.subtract(const Duration(hours: 5)),
+        attentionCount: 1,
+        lines: const [
+          '家庭中枢：运行正常',
+          '毫米波雷达：监测中',
+          '智能药盒：电量偏低',
+          '紧急求助按钮：运行正常',
+          '告警通知：通道可用',
+        ],
       ),
       alerts: [
         CareAlert(
@@ -31,12 +122,38 @@ class DemoRepository {
             AlertTimelineEntry(
               title: '本地语音询问',
               detail: '家庭中枢已询问“您还好吗？”，暂未收到回应。',
-              occurredAt: now.subtract(const Duration(minutes: 3, seconds: 50)),
+              occurredAt: now.subtract(
+                const Duration(minutes: 3, seconds: 50),
+              ),
             ),
             AlertTimelineEntry(
               title: '已通知家属',
               detail: '已向第一联系人发送 App 紧急通知。',
-              occurredAt: now.subtract(const Duration(minutes: 3, seconds: 35)),
+              occurredAt: now.subtract(
+                const Duration(minutes: 3, seconds: 35),
+              ),
+            ),
+          ],
+        ),
+        CareAlert(
+          id: 'alert-night-001',
+          title: '夜间长时间未活动',
+          description: '卧室在 23:40 后持续静止，次日清晨已检测到正常起身。',
+          location: '卧室',
+          occurredAt: now.subtract(const Duration(hours: 11)),
+          severity: AlertSeverity.info,
+          status: AlertStatus.resolved,
+          claimedBy: '系统',
+          timeline: [
+            AlertTimelineEntry(
+              title: '记录到持续静止',
+              detail: '卧室在设定的夜间时段内没有检测到活动。',
+              occurredAt: now.subtract(const Duration(hours: 11)),
+            ),
+            AlertTimelineEntry(
+              title: '清晨活动恢复',
+              detail: '检测到起身和离开卧室，记录已自动结束。',
+              occurredAt: now.subtract(const Duration(hours: 4)),
             ),
           ],
         ),
@@ -94,6 +211,9 @@ class DemoRepository {
           status: DeviceStatus.online,
           statusText: '运行正常',
           lastSeenAt: now.subtract(const Duration(seconds: 18)),
+          firmware: '2.3.1',
+          powerLabel: '市电',
+          criticalForProtection: true,
         ),
         CareDevice(
           id: 'radar-001',
@@ -103,6 +223,9 @@ class DemoRepository {
           status: DeviceStatus.online,
           statusText: '监测中',
           lastSeenAt: now.subtract(const Duration(seconds: 22)),
+          firmware: '1.8.0',
+          powerLabel: '市电',
+          criticalForProtection: true,
         ),
         CareDevice(
           id: 'pillbox-001',
@@ -112,7 +235,11 @@ class DemoRepository {
           status: DeviceStatus.warning,
           statusText: '电量偏低',
           lastSeenAt: now.subtract(const Duration(minutes: 2)),
+          firmware: '1.4.2',
+          powerLabel: '电池',
+          criticalForProtection: false,
           batteryPercent: 18,
+          fault: '电量低于 20%，预计还可使用约 3 天',
         ),
         CareDevice(
           id: 'button-001',
@@ -122,6 +249,9 @@ class DemoRepository {
           status: DeviceStatus.online,
           statusText: '运行正常',
           lastSeenAt: now.subtract(const Duration(minutes: 1)),
+          firmware: '1.1.6',
+          powerLabel: '电池',
+          criticalForProtection: false,
           batteryPercent: 86,
         ),
       ],
@@ -129,16 +259,30 @@ class DemoRepository {
         MedicationTask(
           id: 'medication-morning',
           name: '早间用药',
-          dosage: '1 号药仓 · 1 次',
-          scheduledAt: DateTime(now.year, now.month, now.day, 8),
+          dosage: '1 次',
+          compartment: '1 号药仓',
+          scheduleText: '每天 08:00',
+          periodLabel: '长期 · 每天',
+          remindRule: '每 10 分钟提醒，最多 3 次',
+          scheduledAt: today.add(const Duration(hours: 8)),
           completed: true,
+          notifyFamilyIfMissed: true,
+          createdBy: '李俊',
+          updatedAt: now.subtract(const Duration(hours: 3, minutes: 10)),
         ),
         MedicationTask(
           id: 'medication-evening',
           name: '晚间用药',
-          dosage: '2 号药仓 · 1 次',
-          scheduledAt: DateTime(now.year, now.month, now.day, 20),
+          dosage: '1 次',
+          compartment: '2 号药仓',
+          scheduleText: '每天 20:00',
+          periodLabel: '长期 · 每天',
+          remindRule: '每 10 分钟提醒，最多 3 次',
+          scheduledAt: today.add(const Duration(hours: 20)),
           completed: false,
+          notifyFamilyIfMissed: true,
+          createdBy: '李俊',
+          updatedAt: now.subtract(const Duration(days: 3)),
         ),
       ],
     );
