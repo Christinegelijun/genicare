@@ -1,0 +1,11 @@
+name: venicare_shared
+description: 安心守护各端共享的数据契约：健康报告结构、参考线与报告生成逻辑。必须保持纯 Dart，不能依赖 Flutter。
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.12.0 <4.0.0"
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0
